@@ -36,7 +36,7 @@ export function useCollections(options?: { includeSeedFallbacks?: boolean }) {
     fetchCollections();
 
     const channel = supabase
-      .channel('collections-changes')
+      .channel(`collections-changes-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'collections' }, () => {
         fetchCollections();
       })

@@ -31,7 +31,7 @@ export function useBanners() {
     fetchBanners();
 
     const channel = supabase
-      .channel('banners-changes')
+      .channel(`banners-changes-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'banners' }, () => {
         fetchBanners();
       })

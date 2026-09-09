@@ -32,7 +32,7 @@ export function useOrders() {
     fetchOrders();
 
     const channel = supabase
-      .channel('orders-changes')
+      .channel(`orders-changes-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
         fetchOrders();
       })

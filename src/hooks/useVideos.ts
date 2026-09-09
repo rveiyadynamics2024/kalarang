@@ -35,7 +35,7 @@ export function useVideos() {
     fetchVideos();
 
     const channel = supabase
-      .channel('videos-changes')
+      .channel(`videos-changes-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'videos' }, () => {
         fetchVideos();
       })
