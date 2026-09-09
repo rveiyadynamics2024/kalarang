@@ -1,8 +1,6 @@
-export interface ColorFamily {
-  name: string;
-  swatch: string;
-  shades: string[];
-}
+import type { ColorFamily } from '../types';
+
+export type { ColorFamily } from '../types';
 
 /** Main shop-by-colour families used on the homepage and for product colour tags. */
 export const COLOR_FAMILIES: ColorFamily[] = [
@@ -44,3 +42,7 @@ export const COLOR_FAMILIES: ColorFamily[] = [
 ];
 
 export const MAIN_COLORS = COLOR_FAMILIES.map((family) => family.name);
+
+export function getColorFamilies(colors?: ColorFamily[]): ColorFamily[] {
+  return colors && colors.length > 0 ? colors : COLOR_FAMILIES;
+}

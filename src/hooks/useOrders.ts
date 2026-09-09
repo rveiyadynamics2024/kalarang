@@ -46,13 +46,12 @@ export function useOrders() {
 
   const addOrder = async (orderData: Omit<Order, 'id' | 'createdAt' | 'status'>) => {
     try {
+      const orderId = crypto.randomUUID();
       const { data, error: insertError } = await supabase
         .from('orders')
-        .insert(orderToRow(orderData))
-        .select('id')
-        .single();
+        .insert({ id: orderId, ...orderToRow(orderData) });
       if (insertError) throw insertError;
-      return data!.id as string;
+      return orderId;
     } catch (err) {
       throw new Error(getSupabaseErrorMessage(err, 'Failed to place order.'));
     }

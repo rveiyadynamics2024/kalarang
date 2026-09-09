@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2, ShoppingBag, Plus, Minus, FileText, Send, ArrowLeft, CheckCircle2, PhoneCall } from 'lucide-react';
+import { Trash2, ShoppingBag, Plus, Minus, FileText, CreditCard, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCartStore } from '../store/cartStore';
 import { useSettings } from '../hooks/useSettings';
@@ -13,6 +13,7 @@ export default function CartPage() {
   const { items, total, updateQty, removeItem, clearCart } = useCartStore();
   const { settings, loading: settingsLoading } = useSettings();
   const { addOrder, getOrdersByPhone } = useOrders();
+  const paymentUrl = import.meta.env.VITE_PAYMENT_URL?.trim();
 
   // Checkout Form State
   const [customerName, setCustomerName] = useState('');
@@ -123,29 +124,11 @@ export default function CartPage() {
       
       if (orderId) {
         setSuccessOrderId(orderId);
-
-        // 3. Compile beautiful WhatsApp receipt summary
-        const cleanStoreNumber = settings.whatsappNumber.replace(/[^0-9]/g, '');
-        const itemsSummary = items.map((itm, idx) => {
-          return `${idx + 1}. ${itm.productName} (${itm.color}) x${itm.qty} - ₹${(itm.price * itm.qty).toLocaleString('en-IN')}`;
-        }).join('\n');
-
-        const discountLine =
-          appliedDiscountAmount > 0
-            ? `First Order Discount (${appliedDiscountPercent}%): -₹${appliedDiscountAmount.toLocaleString('en-IN')}\n`
-            : '';
-
-        const messageText = `Hi KALARANG! 🌸\nI have placed a Saree Enquiry Order from your online boutique!\n\n🛍️ *ORDER ID:* ${orderId}\n👤 *Customer Name:* ${customerName}\n📞 *Phone:* ${phone}\n📍 *Delivery Address:* ${address}, Pincode: ${pincode}\n📝 *Notes:* ${notes || 'None'}\n\n*SAREES SELECTED:*\n${itemsSummary}\n\n*SUMMARY:*\nSubtotal: ₹${total.toLocaleString('en-IN')}\n${discountLine}Shipping: ${appliedShipping === 0 ? 'FREE' : `₹${appliedShipping}`}\n*Estimated Grand Total: ₹${appliedGrandTotal.toLocaleString('en-IN')}*\n\nPlease confirm availability and details to trigger payment/shipment! 🙏`;
-
-        // 4. Redirect on WA in popup tab
-        window.open(`https://wa.me/${cleanStoreNumber}?text=${encodeURIComponent(messageText)}`, '_blank');
-
-        // 5. Purge Zustand shopping cart
         clearCart();
       }
     } catch (err) {
       console.error('Order reservation failure:', err);
-      alert('Encountered an order creation error. Please try again or contact us directly on WhatsApp.');
+      alert('We could not create your order. Please check your details and try again.');
     } finally {
       setSubmitting(false);
     }
@@ -176,7 +159,7 @@ export default function CartPage() {
             </div>
 
             <p className="font-serif text-sm sm:text-base text-gray-600 italic max-w-md">
-              "We appreciate your order. A designer has received your saree inquiry and will verify loom availability instantly."
+              Your order has been reserved. Continue to secure online payment for the total shown below.
             </p>
 
             <div className="bg-[#E8D5B0]/30 border border-[#B8860B]/10 w-full p-4 rounded text-left font-sans text-xs sm:text-sm flex flex-col gap-2 text-gray-700">
@@ -195,16 +178,18 @@ export default function CartPage() {
             </div>
 
             <div className="w-full flex flex-col gap-3 mt-4">
-              <button
-                onClick={() => {
-                  const cleanStoreNumber = settings.whatsappNumber.replace(/[^0-9]/g, '');
-                  const quickMsg = `Hi KALARANG! I'm verifying the status for my Saree Order ID: ${successOrderId}. Thank you!`;
-                  window.open(`https://wa.me/${cleanStoreNumber}?text=${encodeURIComponent(quickMsg)}`, '_blank');
-                }}
-                className="inline-flex items-center justify-center gap-2 bg-green-700 hover:bg-green-800 text-white rounded font-sans text-xs tracking-wider uppercase font-bold py-3 px-6 cursor-pointer"
-              >
-                <PhoneCall className="h-4 w-4" /> Ping Us Again On WhatsApp
-              </button>
+              {paymentUrl ? (
+                <a
+                  href={`${paymentUrl}${paymentUrl.includes('?') ? '&' : '?'}order_id=${encodeURIComponent(successOrderId)}&amount=${encodeURIComponent(grandTotal)}`}
+                  className="inline-flex items-center justify-center gap-2 bg-[#7A1C2E] hover:bg-[#1C1008] text-white rounded font-sans text-xs tracking-wider uppercase font-bold py-3 px-6 cursor-pointer transition-colors"
+                >
+                  <CreditCard className="h-4 w-4" /> Continue to Online Payment
+                </a>
+              ) : (
+                <p className="rounded border border-[#B8860B]/20 bg-[#E8D5B0]/20 p-3 text-xs text-[#1C1008]">
+                  Online payment is temporarily unavailable. Please try again after payment setup is completed.
+                </p>
+              )}
 
               <Link
                 to="/collections/all"
@@ -363,7 +348,7 @@ export default function CartPage() {
                   {/* Customer phone contact */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-[#1C1008] uppercase tracking-wider">
-                      WhatsApp Contact Phone <span className="text-red-500">*</span>
+                      Contact Phone <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
@@ -374,7 +359,7 @@ export default function CartPage() {
                       className="bg-[#FDF8F2] border border-[#B8860B]/25 rounded px-3.5 py-2.5 text-sm text-[#1C1008] focus:border-[#7A1C2E] focus:outline-none"
                     />
                     <span className="text-[10px] text-gray-500 mt-0.5">
-                      Used to coordinate shipment updates on WhatsApp directly.
+                      Used for order and delivery updates.
                     </span>
                   </div>
 
@@ -476,13 +461,13 @@ export default function CartPage() {
                       </>
                     ) : (
                       <>
-                        <Send className="h-4 w-4 shrink-0" /> Place Order & Complete On WhatsApp
+                        <CreditCard className="h-4 w-4 shrink-0" /> Place Order & Continue to Payment
                       </>
                     )}
                   </button>
 
                   <p className="text-[10px] text-center text-gray-500 mt-1 leading-normal italic">
-                    Submitting saves order safely to our catalog cloud, and launches WhatsApp text thread checkout immediately.
+                    Your order is saved securely before you continue to online payment.
                   </p>
 
                 </form>

@@ -205,6 +205,7 @@ export interface SettingsRow {
   announcement_bar: { enabled: boolean; text: string } | null;
   free_shipping_threshold: number;
   first_order_discount: { enabled: boolean; percent: number } | null;
+  colors: Settings['colors'] | null;
 }
 
 export function rowToSettings(row: SettingsRow): Settings {
@@ -216,6 +217,7 @@ export function rowToSettings(row: SettingsRow): Settings {
     announcementBar: row.announcement_bar ?? { enabled: false, text: '' },
     freeShippingThreshold: Number(row.free_shipping_threshold),
     firstOrderDiscount: row.first_order_discount ?? undefined,
+    colors: row.colors ?? undefined,
   };
 }
 
@@ -229,6 +231,7 @@ export function settingsToRow(data: Settings): Record<string, unknown> {
     announcement_bar: data.announcementBar,
     free_shipping_threshold: data.freeShippingThreshold,
     first_order_discount: data.firstOrderDiscount,
+    colors: data.colors,
   };
 }
 

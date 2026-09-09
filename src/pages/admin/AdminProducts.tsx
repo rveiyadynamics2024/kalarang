@@ -5,7 +5,7 @@ import { uploadFiles } from '../../supabase/storageUpload';
 import { getFirebaseErrorMessage } from '../../supabase/errors';
 import { Product } from '../../types';
 import { formatWhatsAppDisplay } from '../../constants/contact';
-import { MAIN_COLORS } from '../../constants/colors';
+import { getColorFamilies } from '../../constants/colors';
 import { useSettings } from '../../hooks/useSettings';
 import {
   Plus,
@@ -49,6 +49,7 @@ export default function AdminProducts() {
   const { products, loading, error, addProduct, updateProduct, deleteProduct } = useProducts();
   const { collections } = useCollections();
   const { settings } = useSettings();
+  const availableColors = getColorFamilies(settings.colors).map((color) => color.name);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -739,7 +740,7 @@ export default function AdminProducts() {
                   Colours
                 </label>
                 <div className="flex flex-wrap gap-2">
-                  {MAIN_COLORS.map((color) => {
+                  {availableColors.map((color) => {
                     const active = selectedColors.includes(color);
                     return (
                       <button

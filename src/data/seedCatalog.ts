@@ -81,7 +81,7 @@ export const SEED_COLLECTIONS: SeedCollection[] = [
     name: 'Blouses',
     slug: 'blouses',
     coverImage:
-      'https://images.unsplash.com/photo-1610030469854-2c069b3f3b90?auto=format&fit=crop&w=600&q=80',
+      'https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=600&q=80',
     order: 7,
     isActive: true,
     description: 'Handcrafted blouses with intricate embroidery, zari work, and custom fits.',

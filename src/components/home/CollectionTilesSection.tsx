@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
@@ -23,6 +23,8 @@ function CollectionTile({
   col: Pick<Collection, 'id' | 'slug' | 'name' | 'coverImage'>;
   index: number;
 }) {
+  const [imageSrc, setImageSrc] = useState(col.coverImage || FALLBACK_IMAGE);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -38,9 +40,12 @@ function CollectionTile({
           className="relative aspect-[3/4] home-card mb-4 group-hover:shadow-[var(--shadow-soft-hover)]"
         >
           <img
-            src={col.coverImage || FALLBACK_IMAGE}
+            src={imageSrc}
             alt={col.name}
             referrerPolicy="no-referrer"
+            onError={() => {
+              if (imageSrc !== FALLBACK_IMAGE) setImageSrc(FALLBACK_IMAGE);
+            }}
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-espresso/70 via-espresso/10 to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-500" />

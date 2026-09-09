@@ -93,4 +93,11 @@ export interface Settings {
     enabled: boolean;
     percent: number;
   };
+  colors?: ColorFamily[];
+}
+
+export interface ColorFamily {
+  name: string;
+  swatch: string;
+  shades: string[];
 }

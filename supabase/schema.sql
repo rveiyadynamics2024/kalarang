@@ -78,8 +78,11 @@ create table if not exists settings (
   studio_address text,
   announcement_bar jsonb not null default '{"enabled": true, "text": ""}'::jsonb,
   free_shipping_threshold numeric not null default 0,
-  first_order_discount jsonb
+  first_order_discount jsonb,
+  colors jsonb not null default '[]'::jsonb
 );
+
+alter table settings add column if not exists colors jsonb not null default '[]'::jsonb;
 
 create table if not exists orders (
   id uuid primary key default gen_random_uuid(),
@@ -102,6 +105,20 @@ create table if not exists orders (
 create index if not exists orders_phone_idx on orders (phone);
 create index if not exists orders_created_at_idx on orders (created_at desc);
 create index if not exists products_created_at_idx on products (created_at desc);
+
+-- Enable live order updates for the admin dashboard. The guarded block keeps
+-- this migration safe to run when the table is already in the publication.
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'orders'
+  ) then
+    alter publication supabase_realtime add table public.orders;
+  end if;
+end;
+$$;
 
 -- -----------------------------------------------------------------------------
 -- Helpers

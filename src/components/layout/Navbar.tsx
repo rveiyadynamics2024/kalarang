@@ -49,10 +49,10 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
   };
 
   return (
-    <header id="main-navbar" className="sticky top-0 z-40 bg-maroon border-b border-gold/20 shadow-md">
+    <header id="main-navbar" className="relative z-40 bg-maroon border-b border-gold/20 shadow-md">
       {/* Top bar — search | logo | account + cart */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="relative flex items-center justify-between h-24 sm:h-28 lg:h-32">
+        <div className="relative flex items-center justify-between h-[4.5rem] sm:h-24 lg:h-28">
           <div className="flex items-center justify-start min-w-[2.5rem] sm:min-w-[5rem] z-10">
             <button
               type="button"
@@ -72,7 +72,7 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
             <img
               src={LOGO_SRC}
               alt="Kalarang Silks & Studio"
-              className="h-20 sm:h-28 lg:h-[7.5rem] w-auto max-w-[260px] sm:max-w-[380px] lg:max-w-[440px] object-contain object-center group-hover:opacity-95 transition-opacity"
+              className="h-14 sm:h-20 lg:h-24 w-auto max-w-[180px] sm:max-w-[260px] lg:max-w-[320px] object-contain object-center group-hover:opacity-95 transition-opacity"
             />
           </Link>
 

@@ -9,6 +9,7 @@ export default function AdminOrders() {
   const { settings } = useSettings();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Subscribe to raw collection updates in real-time
   useEffect(() => {
@@ -16,10 +17,12 @@ export default function AdminOrders() {
       (data) => {
         setOrders(data);
         setLoading(false);
+        setLoadError(null);
       },
       (err) => {
         console.error('Enquiry real-time load error:', err);
         setLoading(false);
+        setLoadError(err.message);
       }
     );
     return () => unsubscribe();
@@ -58,6 +61,13 @@ export default function AdminOrders() {
         <div className="text-center py-20 text-gray-500">
           <div className="w-10 h-10 border-4 border-[#B8860B] border-t-transparent rounded-full animate-spin mb-4 mx-auto" />
           <p className="font-serif italic text-[#1C1008]">Synchronizing with purchase ledger collection...</p>
+        </div>
+      ) : loadError ? (
+        <div className="bg-red-50 border border-red-200 rounded p-6 text-center max-w-xl mx-auto">
+          <ShieldAlert className="h-8 w-8 text-red-600 mx-auto mb-3" />
+          <p className="font-semibold text-red-800">Orders could not be loaded</p>
+          <p className="text-xs text-red-700 mt-2">{loadError}</p>
+          <p className="text-xs text-gray-600 mt-3">Confirm that the latest Supabase schema has been run and that you are signed in as an admin.</p>
         </div>
       ) : orders.length === 0 ? (
         <div className="bg-[#FDF8F2] border border-[#B8860B]/15 rounded p-12 text-center max-w-xl mx-auto flex flex-col gap-3 items-center">

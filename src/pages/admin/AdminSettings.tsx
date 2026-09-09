@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSettings } from '../../hooks/useSettings';
 import { Settings } from '../../types';
-import { Save, Loader2, Check, AlertCircle } from 'lucide-react';
+import { Save, Loader2, Check, Plus, Trash2 } from 'lucide-react';
+import { COLOR_FAMILIES, getColorFamilies } from '../../constants/colors';
+import type { ColorFamily } from '../../types';
 
 export default function AdminSettings() {
   const { settings, saveSettings, loading } = useSettings();
@@ -16,6 +18,7 @@ export default function AdminSettings() {
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(5000);
   const [firstOrderDiscountEnabled, setFirstOrderDiscountEnabled] = useState(true);
   const [firstOrderDiscountPercent, setFirstOrderDiscountPercent] = useState(10);
+  const [colorFamilies, setColorFamilies] = useState<ColorFamily[]>(COLOR_FAMILIES);
 
   // Status indicators
   const [submitting, setSubmitting] = useState(false);
@@ -33,6 +36,7 @@ export default function AdminSettings() {
       setFreeShippingThreshold(settings.freeShippingThreshold || 5000);
       setFirstOrderDiscountEnabled(settings.firstOrderDiscount?.enabled ?? true);
       setFirstOrderDiscountPercent(settings.firstOrderDiscount?.percent ?? 10);
+      setColorFamilies(getColorFamilies(settings.colors));
     }
   }, [settings]);
 
@@ -56,6 +60,7 @@ export default function AdminSettings() {
           enabled: firstOrderDiscountEnabled,
           percent: firstOrderDiscountPercent,
         },
+        colors: colorFamilies,
       };
 
       await saveSettings(payload);
@@ -226,6 +231,55 @@ export default function AdminSettings() {
                   className="bg-[#FDF8F2] border border-[#B8860B]/25 rounded px-3.5 py-2.5 text-sm focus:border-[#7A1C2E] focus:outline-none font-mono text-[#1C1008] max-w-xs disabled:opacity-50"
                 />
               </div>
+            </div>
+
+            <div className="flex flex-col gap-4 bg-[#E8D5B0]/15 p-4 rounded border border-[#B8860B]/10">
+              <div>
+                <h2 className="text-xs font-bold text-[#1C1008] uppercase tracking-wider">Shop by colour</h2>
+                <p className="text-[10px] text-gray-500 mt-1">Add, remove, rename, or recolour the homepage filters and product options.</p>
+              </div>
+              <div className="flex flex-col gap-3">
+                {colorFamilies.map((family, index) => (
+                  <div key={`${family.name}-${index}`} className="grid grid-cols-[auto_1fr] sm:grid-cols-[auto_1fr_auto] gap-3 items-start bg-[#FDF8F2] border border-[#B8860B]/15 rounded p-3">
+                    <input
+                      type="color"
+                      value={family.swatch}
+                      onChange={(e) => setColorFamilies((items) => items.map((item, i) => i === index ? { ...item, swatch: e.target.value } : item))}
+                      className="h-9 w-9 rounded cursor-pointer border-0 p-0"
+                      aria-label={`${family.name} swatch colour`}
+                    />
+                    <div className="flex flex-col gap-2">
+                      <input
+                        value={family.name}
+                        onChange={(e) => setColorFamilies((items) => items.map((item, i) => i === index ? { ...item, name: e.target.value } : item))}
+                        placeholder="Colour family name"
+                        className="bg-[#FDF8F2] border border-[#B8860B]/25 rounded px-3 py-2 text-xs font-semibold text-[#1C1008] focus:outline-none focus:border-[#7A1C2E]"
+                      />
+                      <input
+                        value={family.shades.join(', ')}
+                        onChange={(e) => setColorFamilies((items) => items.map((item, i) => i === index ? { ...item, shades: e.target.value.split(',').map((shade) => shade.trim()).filter(Boolean) } : item))}
+                        placeholder="Shades separated by commas"
+                        className="bg-[#FDF8F2] border border-[#B8860B]/25 rounded px-3 py-2 text-xs text-[#1C1008] focus:outline-none focus:border-[#7A1C2E]"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setColorFamilies((items) => items.filter((_, i) => i !== index))}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded border border-red-200 text-red-700 hover:bg-red-50"
+                      aria-label={`Remove ${family.name || 'colour'}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => setColorFamilies((items) => [...items, { name: 'New Colour', swatch: '#B8956F', shades: ['New Colour'] }])}
+                className="inline-flex items-center justify-center gap-2 self-start border border-[#7A1C2E] text-[#7A1C2E] rounded px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-[#7A1C2E] hover:text-white"
+              >
+                <Plus className="h-4 w-4" /> Add colour
+              </button>
             </div>
 
             {/* Success alert message */}

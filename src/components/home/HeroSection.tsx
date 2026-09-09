@@ -23,6 +23,7 @@ export default function HeroSection({ banner, collageImages }: HeroSectionProps)
 
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const goTo = useCallback(
     (index: number) => {
@@ -49,7 +50,7 @@ export default function HeroSection({ banner, collageImages }: HeroSectionProps)
   return (
     <section
       id="hero-banner"
-      className="relative overflow-hidden min-h-[620px] sm:min-h-[680px] lg:min-h-[720px]"
+      className="relative overflow-hidden min-h-[560px] sm:min-h-[640px] lg:min-h-[720px]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       aria-label="Featured saree collections"
@@ -96,10 +97,15 @@ export default function HeroSection({ banner, collageImages }: HeroSectionProps)
             className="absolute inset-0"
           >
             <img
-              src={activeSlide.image}
+              src={failedImages[activeSlide.id] ? (banner.imageUrl || heroSlides[0].image) : activeSlide.image}
               alt={`${activeSlide.pattern} saree`}
               referrerPolicy="no-referrer"
-              className="w-full h-full object-cover object-top lg:object-center"
+              onError={() => {
+                if (!failedImages[activeSlide.id]) {
+                  setFailedImages((images) => ({ ...images, [activeSlide.id]: true }));
+                }
+              }}
+              className="w-full h-full object-cover object-center"
             />
             <div className="absolute inset-0 bg-gradient-to-l from-transparent via-[#1a0510]/20 to-[#1a0510]/70 lg:via-[#1a0510]/10 lg:to-[#1a0510]/40" />
           </motion.div>
@@ -107,8 +113,8 @@ export default function HeroSection({ banner, collageImages }: HeroSectionProps)
       </div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full min-h-[620px] sm:min-h-[680px] lg:min-h-[720px] flex flex-col justify-end lg:justify-center pb-10 sm:pb-12 lg:pb-0">
-        <div className="max-w-xl">
+      <div className="relative z-10 max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 h-full min-h-[560px] sm:min-h-[640px] lg:min-h-[720px] flex flex-col justify-end lg:justify-center pb-8 sm:pb-12 lg:pb-0">
+        <div className="max-w-xl lg:max-w-[34rem]">
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -130,14 +136,14 @@ export default function HeroSection({ banner, collageImages }: HeroSectionProps)
                 {activeSlide.pattern}
               </span>
 
-              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-medium text-white leading-[1.05] tracking-tight mt-5">
+              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-medium text-white leading-[1.05] mt-5">
                 {hero.headline.split(' ').slice(0, 2).join(' ')}
                 <span className="block text-tan mt-1">
                   {hero.headline.split(' ').slice(2).join(' ')}
                 </span>
               </h1>
 
-              <p className="font-sans text-sm sm:text-base text-white/75 mt-4 max-w-md leading-relaxed">
+              <p className="font-sans text-xs sm:text-sm lg:text-base text-white/75 mt-4 max-w-md leading-relaxed">
                 {activeSlide.tagline}. {banner.subtext || hero.subtext}
               </p>
             </motion.div>
@@ -147,18 +153,18 @@ export default function HeroSection({ banner, collageImages }: HeroSectionProps)
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-wrap items-center gap-3 mt-8"
+            className="flex flex-wrap items-center gap-2 sm:gap-3 mt-7 sm:mt-8"
           >
             <button
               type="button"
               onClick={scrollToProducts}
-              className="kanya-btn rounded-full !px-7 shadow-lg shadow-tan/20 hover:shadow-tan/30 transition-shadow"
+              className="kanya-btn rounded-full !px-5 sm:!px-7 shadow-lg shadow-tan/20 hover:shadow-tan/30 transition-shadow"
             >
               Shop Now
             </button>
             <Link
               to={hero.secondaryCta.href}
-              className="inline-flex items-center justify-center px-7 py-3 rounded-full text-[11px] font-bold uppercase tracking-wider text-white border border-white/30 hover:bg-white/10 backdrop-blur-sm transition-colors"
+              className="inline-flex items-center justify-center px-5 sm:px-7 py-3 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-white border border-white/30 hover:bg-white/10 backdrop-blur-sm transition-colors"
             >
               {hero.secondaryCta.label}
             </Link>
@@ -222,7 +228,7 @@ export default function HeroSection({ banner, collageImages }: HeroSectionProps)
       </button>
 
       {/* Decorative border frame */}
-      <div className="absolute inset-x-4 sm:inset-x-8 top-4 bottom-4 sm:top-6 sm:bottom-6 border border-gold/10 rounded-3xl pointer-events-none z-10" />
+      <div className="absolute inset-x-3 sm:inset-x-8 top-3 bottom-3 sm:top-6 sm:bottom-6 border border-gold/10 rounded-2xl sm:rounded-3xl pointer-events-none z-10" />
     </section>
   );
 }

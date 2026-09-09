@@ -2,13 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
-import { COLOR_FAMILIES } from '../../constants/colors';
+import { getColorFamilies } from '../../constants/colors';
+import { useSettings } from '../../hooks/useSettings';
 import CenteredSectionHeader from '../marketing/CenteredSectionHeader';
 import HomeSection from './HomeSection';
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export default function ColorSection() {
+  const { settings } = useSettings();
+  const colorFamilies = getColorFamilies(settings.colors);
+
   return (
     <section id="shop-by-colour" aria-label="Shop by colour">
       <HomeSection>
@@ -18,7 +22,7 @@ export default function ColorSection() {
         />
 
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4 sm:gap-5">
-          {COLOR_FAMILIES.map((family, index) => (
+          {colorFamilies.map((family, index) => (
             <motion.div
               key={family.name}
               initial={{ opacity: 0, y: 20 }}

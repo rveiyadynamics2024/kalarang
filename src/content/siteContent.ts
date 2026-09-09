@@ -219,9 +219,101 @@ export const process = {
 export const testimonials = {
   title: 'What Our Customers Say',
   quotes: [
-    "KalaRang transformed my mother's wedding saree into a beautiful contemporary outfit that I will treasure forever.",
-    'The attention to detail and creativity exceeded my expectations.',
-    'I finally found a place where custom fashion feels personal, affordable, and stress-free.',
+    {
+      name: 'Ananya Rao',
+      location: 'Bengaluru',
+      quote: "KalaRang transformed my mother's wedding saree into a beautiful contemporary outfit that I will treasure forever.",
+    },
+    {
+      name: 'Meera Nair',
+      location: 'Chennai',
+      quote: 'The attention to detail and creativity exceeded my expectations. My blouse fit perfectly from the first fitting.',
+    },
+    {
+      name: 'Radhika Iyer',
+      location: 'Mysuru',
+      quote: 'I finally found a place where custom fashion feels personal, affordable, and stress-free.',
+    },
+    {
+      name: 'Kavya Sharma',
+      location: 'Hyderabad',
+      quote: 'The hand-painted details on my saree were even more beautiful than I imagined. Every brushstroke feels made for me.',
+    },
+    {
+      name: 'Divya Menon',
+      location: 'Kochi',
+      quote: 'From choosing the fabric to the final finishing, the team made the entire experience warm, clear, and genuinely enjoyable.',
+    },
+    {
+      name: 'Nisha Kapoor',
+      location: 'Mumbai',
+      quote: 'My festive saree arrived beautifully finished and ready to wear. KalaRang has become my first stop for meaningful pieces.',
+    },
+    {
+      name: 'Pooja Desai',
+      location: 'Pune',
+      quote: 'The colours, fabric quality, and finishing were all wonderful. I received compliments all evening at my sister’s wedding.',
+    },
+    {
+      name: 'Lakshmi Srinivas',
+      location: 'Bengaluru',
+      quote: 'I loved how patiently the team understood exactly what I wanted before beginning the design.',
+    },
+    {
+      name: 'Sana Khan',
+      location: 'Delhi',
+      quote: 'The custom tailoring gave my old saree a completely new life. It feels modern while keeping its memories intact.',
+    },
+    {
+      name: 'Aditi Joshi',
+      location: 'Mumbai',
+      quote: 'Beautiful craftsmanship and very thoughtful service. The final piece looked even better than the sketch.',
+    },
+    {
+      name: 'Harini Krishnan',
+      location: 'Chennai',
+      quote: 'The blouse fitting was precise and comfortable, and the zari details were finished beautifully.',
+    },
+    {
+      name: 'Neha Bhat',
+      location: 'Mangaluru',
+      quote: 'KalaRang made choosing a special outfit feel simple and personal. I am delighted with the result.',
+    },
+    {
+      name: 'Ishita Verma',
+      location: 'Hyderabad',
+      quote: 'The hand-painted floral work is delicate, elegant, and truly one of a kind.',
+    },
+    {
+      name: 'Swati Kulkarni',
+      location: 'Pune',
+      quote: 'A lovely experience from consultation to delivery. The team paid attention to every small detail.',
+    },
+    {
+      name: 'Madhuri Rao',
+      location: 'Bengaluru',
+      quote: 'My heirloom saree was transformed with so much care. It is now something I can wear and pass on.',
+    },
+    {
+      name: 'Farah Ali',
+      location: 'Kochi',
+      quote: 'The fabric recommendations were perfect for the occasion, and the outfit felt light and graceful.',
+    },
+    {
+      name: 'Sneha Patil',
+      location: 'Nashik',
+      quote: 'The craftsmanship is exceptional. You can see the care in every seam and every finish.',
+    },
+    {
+      name: 'Ritu Malhotra',
+      location: 'Gurugram',
+      quote: 'I wanted something personal rather than mass-produced, and KalaRang delivered exactly that.',
+    },
+    {
+      name: 'Anu George',
+      location: 'Kochi',
+      quote: 'The team was warm, responsive, and creative. My occasion wear turned out beautifully.',
+    },
   ],
 };
 

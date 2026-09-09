@@ -3,6 +3,7 @@ import { supabase } from '../supabase/config';
 import { getSupabaseErrorMessage } from '../supabase/errors';
 import { rowToSettings, settingsToRow, type SettingsRow } from '../supabase/mappers';
 import { Settings } from '../types';
+import { COLOR_FAMILIES } from '../constants/colors';
 
 const DEFAULT_SETTINGS: Settings = {
   storeName: 'KALARANG — Silks & Studio',
@@ -15,6 +16,7 @@ const DEFAULT_SETTINGS: Settings = {
   },
   freeShippingThreshold: 5000,
   firstOrderDiscount: { enabled: true, percent: 10 },
+  colors: COLOR_FAMILIES,
 };
 
 export function useSettings() {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, MessageSquare, Tag, Check, ArrowLeft, Heart, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { ShoppingCart, CreditCard, Check, ArrowLeft, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useProducts } from '../hooks/useProducts';
 import { useCollections } from '../hooks/useCollections';
@@ -9,22 +9,26 @@ import ProductGrid from '../components/products/ProductGrid';
 import AnnouncementBar from '../components/layout/AnnouncementBar';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
-import WhatsAppFAB from '../components/layout/WhatsAppFAB';
-import { whatsAppUrl, formatWhatsAppDisplay } from '../constants/contact';
-import { useSettings } from '../hooks/useSettings';
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
 
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { products, loading: productsLoading } = useProducts();
   const { collections } = useCollections({ includeSeedFallbacks: true });
-  const { settings } = useSettings();
   const { addItem } = useCartStore();
 
   const [activeImage, setActiveImage] = useState<string>('');
   const [showVideo, setShowVideo] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [isAddedFeedback, setIsAddedFeedback] = useState<boolean>(false);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const product = products.find((p) => p.slug === slug && !p.isDeleted);
 
@@ -95,9 +99,58 @@ export default function ProductDetail() {
     setTimeout(() => setIsAddedFeedback(false), 2000);
   };
 
-  const handleWhatsAppEnquiry = () => {
-    const messageText = `Hi KALARANG! I'm interested in the "${product.name}" saree (₹${product.salePrice.toLocaleString('en-IN')}). Please share more details.`;
-    window.open(whatsAppUrl(messageText, settings?.whatsappNumber), '_blank');
+  const handleOnlinePayment = async () => {
+    const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID?.trim();
+    if (!keyId) {
+      setPaymentError('Online payment is not configured. Add VITE_RAZORPAY_KEY_ID to your local .env file.');
+      return;
+    }
+
+    setPaymentLoading(true);
+    setPaymentError(null);
+
+    try {
+      if (!window.Razorpay) {
+        await new Promise<void>((resolve, reject) => {
+          const existingScript = document.querySelector('script[data-razorpay-checkout]');
+          if (existingScript) {
+            existingScript.addEventListener('load', () => resolve(), { once: true });
+            existingScript.addEventListener('error', () => reject(new Error('Razorpay failed to load.')), { once: true });
+            return;
+          }
+
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.async = true;
+          script.dataset.razorpayCheckout = 'true';
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error('Razorpay failed to load.'));
+          document.body.appendChild(script);
+        });
+      }
+
+      if (!window.Razorpay) throw new Error('Razorpay checkout is unavailable.');
+
+      const checkout = new window.Razorpay({
+        key: keyId,
+        amount: Math.round(product.salePrice * 100),
+        currency: 'INR',
+        name: 'KALARANG Silks & Studio',
+        description: product.name,
+        image: '/kalarang.png',
+        notes: { product_slug: product.slug, selected_colour: selectedColor || 'Standard' },
+        theme: { color: '#7A1C2E' },
+        handler: () => {
+          setPaymentError('Payment received. Please save your payment confirmation for order support.');
+        },
+        modal: { ondismiss: () => setPaymentLoading(false) },
+      });
+      checkout.open();
+    } catch (error) {
+      setPaymentError(error instanceof Error ? error.message : 'Unable to open online payment.');
+    } finally {
+      setPaymentLoading(false);
+    }
   };
 
   const showAddToCart = product.inStock && product.allowAddToCart !== false;
@@ -298,13 +351,20 @@ export default function ProductDetail() {
               )}
 
               <button
-                onClick={handleWhatsAppEnquiry}
-                className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white py-4.5 px-6 rounded text-xs tracking-widest font-sans font-bold uppercase transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+                onClick={handleOnlinePayment}
+                disabled={paymentLoading || !product.inStock}
+                className="flex-1 bg-[#7A1C2E] hover:bg-[#1C1008] disabled:opacity-60 text-white py-4.5 px-6 rounded text-xs tracking-widest font-sans font-bold uppercase transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
               >
-                <MessageSquare className="h-4.5 w-4.5 shrink-0" />
-                WhatsApp {formatWhatsAppDisplay(settings?.whatsappNumber)}
+                <CreditCard className="h-4.5 w-4.5 shrink-0" />
+                {paymentLoading ? 'Opening Payment...' : 'Pay Online with Razorpay'}
               </button>
             </div>
+
+            {paymentError && (
+              <p className="text-xs text-[#7A1C2E] bg-[#E8D5B0]/25 border border-[#B8860B]/20 rounded p-3" role="status">
+                {paymentError}
+              </p>
+            )}
 
             {/* Product details */}
             <div className="border-t border-[#B8860B]/10 pt-6">
@@ -357,7 +417,6 @@ export default function ProductDetail() {
 
       </div>
 
-      <WhatsAppFAB />
       <Footer />
     </div>
   );

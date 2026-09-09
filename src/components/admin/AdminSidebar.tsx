@@ -12,7 +12,11 @@ import {
 } from 'lucide-react';
 import { logoutAdmin } from '../../auth';
 
-export default function AdminSidebar() {
+interface AdminSidebarProps {
+  onNavigate?: () => void;
+}
+
+export default function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -35,7 +39,7 @@ export default function AdminSidebar() {
   return (
     <aside 
       id="admin-sidebar"
-      className="w-64 bg-[#1C1008] text-[#FDF8F2] flex flex-col justify-between border-r-2 border-[#B8860B] min-h-screen shrink-0 h-sticky top-0"
+      className="w-64 bg-[#1C1008] text-[#FDF8F2] flex flex-col justify-between border-r-2 border-[#B8860B] min-h-screen shrink-0"
     >
       <div className="flex flex-col">
         {/* Sidebar Header Brand Signature */}
@@ -63,6 +67,7 @@ export default function AdminSidebar() {
                       : 'text-[#FDF8F2]/70 hover:text-white hover:bg-[#B8860B]/10'
                   }`
                 }
+                onClick={onNavigate}
               >
                 <IconComponent className="h-4.5 w-4.5 shrink-0" />
                 {item.name}

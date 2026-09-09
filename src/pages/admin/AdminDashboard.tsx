@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useProducts } from '../../hooks/useProducts';
 import { useCollections } from '../../hooks/useCollections';
 import { useOrders } from '../../hooks/useOrders';
@@ -13,6 +14,11 @@ import {
   TrendingUp, 
   Database,
   Loader2,
+  IndianRupee,
+  PackageCheck,
+  ArrowUpRight,
+  Plus,
+  Settings,
 } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -50,6 +56,9 @@ export default function AdminDashboard() {
   const totalSalesRevenue = orders
     .filter((o) => o.status !== 'pending') // Only completed/confirmed orders contribute to definitive sales indicators
     .reduce((sum, o) => sum + o.total, 0);
+  const averageOrderValue = totalOrdersCount > 0 ? totalSalesRevenue / totalOrdersCount : 0;
+  const completedOrders = orders.filter((o) => o.status === 'delivered').length;
+  const lowStockCount = products.filter((p) => !p.isDeleted && !p.inStock).length;
 
   const existingSlugs = new Set(collections.map((c) => c.slug));
   const missingRequiredCategories = REQUIRED_CATEGORY_SLUGS.filter(
@@ -121,6 +130,18 @@ export default function AdminDashboard() {
       value: pendingCount,
       icon: AlertCircle,
       color: 'bg-blue-500/10 text-blue-800 border-blue-500/20'
+    },
+    {
+      name: 'Gross Revenue',
+      value: `₹${totalSalesRevenue.toLocaleString('en-IN')}`,
+      icon: IndianRupee,
+      color: 'bg-emerald-500/10 text-emerald-800 border-emerald-500/20'
+    },
+    {
+      name: 'Average Order',
+      value: `₹${Math.round(averageOrderValue).toLocaleString('en-IN')}`,
+      icon: TrendingUp,
+      color: 'bg-violet-500/10 text-violet-800 border-violet-500/20'
     }
   ];
 
@@ -190,7 +211,7 @@ export default function AdminDashboard() {
       )}
 
       {/* Metrics Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {statsList.map((stat) => {
           const IconComponent = stat.icon;
           return (
@@ -202,7 +223,7 @@ export default function AdminDashboard() {
                 <span className="text-xs font-bold uppercase tracking-wider text-gray-500">
                   {stat.name}
                 </span>
-                <span className="text-3xl font-extrabold tracking-tight font-serif text-[#1C1008]">
+                <span className="text-2xl font-extrabold tracking-tight font-serif text-[#1C1008] break-words">
                   {stat.value}
                 </span>
               </div>
@@ -212,6 +233,49 @@ export default function AdminDashboard() {
             </div>
           );
         })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 bg-white border border-[#B8860B]/15 rounded-md p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div>
+              <h2 className="font-serif text-lg font-bold text-[#1C1008] uppercase">Store health</h2>
+              <p className="text-xs text-gray-500 mt-1">Operational signals for today&apos;s catalogue.</p>
+            </div>
+            <PackageCheck className="h-5 w-5 text-[#B8860B]" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="rounded border border-gray-100 bg-[#FDF8F2] p-4">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Delivered orders</span>
+              <strong className="mt-2 block text-2xl text-[#1C1008]">{completedOrders}</strong>
+            </div>
+            <div className="rounded border border-gray-100 bg-[#FDF8F2] p-4">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Out of stock</span>
+              <strong className={`mt-2 block text-2xl ${lowStockCount > 0 ? 'text-red-700' : 'text-[#1C1008]'}`}>{lowStockCount}</strong>
+            </div>
+            <div className="rounded border border-gray-100 bg-[#FDF8F2] p-4">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Conversion queue</span>
+              <strong className="mt-2 block text-2xl text-[#1C1008]">{pendingCount}</strong>
+            </div>
+          </div>
+        </div>
+        <div className="bg-[#7A1C2E] text-white rounded-md p-5 shadow-sm">
+          <h2 className="font-serif text-lg font-bold uppercase">Quick actions</h2>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <Link to="/admin/products" className="flex items-center justify-between gap-2 rounded bg-white/10 px-3 py-3 text-xs font-bold hover:bg-white/20">
+              Add product <Plus className="h-4 w-4" />
+            </Link>
+            <Link to="/admin/orders" className="flex items-center justify-between gap-2 rounded bg-white/10 px-3 py-3 text-xs font-bold hover:bg-white/20">
+              Review orders <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link to="/admin/banners" className="flex items-center justify-between gap-2 rounded bg-white/10 px-3 py-3 text-xs font-bold hover:bg-white/20">
+              Update hero <ArrowUpRight className="h-4 w-4" />
+            </Link>
+            <Link to="/admin/settings" className="flex items-center justify-between gap-2 rounded bg-white/10 px-3 py-3 text-xs font-bold hover:bg-white/20">
+              Store settings <Settings className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
       </div>
 
       {/* Main Grid: Recent Transactions & Quick Guides */}
