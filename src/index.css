@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  --color-cream: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-espresso: #1A1A1A;
+  --color-maroon: #34020D;
+  --color-gold: #d4af37;
+  --color-sand: #F3F0EB;
+  --color-muted: #737373;
+  --color-border: #E5E5E5;
+  --color-brand-deep: #34020D;
+  --color-brand-gold: #d4af37;
+  --color-tan: #b8956f;
+  --color-tan-dark: #9a7b5a;
+  --radius-kit: 16px;
+  --shadow-kit: 0 1px 3px rgb(0 0 0 / 0.06), 0 1px 2px rgb(0 0 0 / 0.04);
+  --shadow-kit-lg: 0 10px 40px rgb(0 0 0 / 0.08);
+  --shadow-soft: 0 4px 20px rgb(0 0 0 / 0.06);
+  --shadow-soft-hover: 0 12px 32px rgb(0 0 0 / 0.09);
+  --radius-home: 20px;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.kit-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-kit);
+  box-shadow: var(--shadow-kit);
+}
+
+.home-card {
+  border-radius: var(--radius-home);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  background: var(--color-surface);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.home-card:hover {
+  box-shadow: var(--shadow-soft-hover);
+}
+
+.kit-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: white;
+  background: var(--color-maroon);
+  border-radius: 9999px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.kit-btn-primary:hover {
+  background: #2a0108;
+}
+
+.kit-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-espresso);
+  background: var(--color-cream);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.kit-btn-secondary:hover {
+  border-color: var(--color-gold);
+  background: white;
+}
+
+.kit-input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--color-espresso);
+  background: var(--color-cream);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.kit-input:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgb(212 175 55 / 0.15);
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Kanya-inspired storefront styles */
+.kanya-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: white;
+  background: var(--color-tan);
+  border: none;
+  transition: background 0.2s;
+}
+
+.kanya-btn:hover {
+  background: var(--color-tan-dark);
+}
+
+.kanya-btn-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: white;
+  background: var(--color-espresso);
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.kanya-btn-dark:hover {
+  opacity: 0.85;
+}
+
+.hero-collage-item {
+  position: absolute;
+  overflow: hidden;
+  border-radius: var(--radius-home);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Hero carousel — Indian textile pattern backgrounds */
+.hero-pattern-brocade {
+  opacity: 0.18;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.8'%3E%3Cpath d='M30 5c-2 4-6 6-10 6 4 0 8 2 10 6 2-4 6-6 10-6-4 0-8-2-10-6zm0 44c-2 4-6 6-10 6 4 0 8 2 10 6 2-4 6-6 10-6-4 0-8-2-10-6zM5 30c4-2 6-6 6-10 0 4-2 8-6 10 4 2 6 6 6 10 0-4 2-8 6-10zm44 0c4-2 6-6 6-10 0 4-2 8-6 10 4 2 6 6 6 10 0-4 2-8 6-10z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.hero-pattern-temple {
+  opacity: 0.15;
+  background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 28px,
+      rgb(212 175 55 / 0.35) 28px,
+      rgb(212 175 55 / 0.35) 30px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgb(212 175 55 / 0.2) 28px,
+      rgb(212 175 55 / 0.2) 30px
+    );
+}
+
+.hero-pattern-paisley {
+  opacity: 0.2;
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='1.2' opacity='0.7'%3E%3Cpath d='M40 8c-8 12-20 16-20 28 0 8 6 14 14 14 6 0 12-4 14-10 2 6 8 10 14 10 8 0 14-6 14-14 0-12-12-16-20-28 0 10-6 18-16 18s-16-8-16-18z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+.hero-pattern-buti {
+  opacity: 0.22;
+  background-image: radial-gradient(circle, rgb(212 175 55 / 0.55) 1.5px, transparent 1.5px),
+    radial-gradient(circle, rgb(184 149 111 / 0.35) 1px, transparent 1px);
+  background-size: 24px 24px, 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+.hero-pattern-peacock {
+  opacity: 0.16;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='1'%3E%3Ccircle cx='50' cy='50' r='18'/%3E%3Ccircle cx='50' cy='50' r='10'/%3E%3Cpath d='M50 32v36M32 50h36M38 38l24 24M62 38L38 62'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100px 100px;
+}
