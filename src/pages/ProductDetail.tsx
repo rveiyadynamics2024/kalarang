@@ -4,6 +4,7 @@ import { ShoppingCart, CreditCard, Check, ArrowLeft, ShieldCheck, Truck, Refresh
 import { motion } from 'motion/react';
 import { useProducts } from '../hooks/useProducts';
 import { useCollections } from '../hooks/useCollections';
+import { useOrders } from '../hooks/useOrders';
 import { useCartStore } from '../store/cartStore';
 import ProductGrid from '../components/products/ProductGrid';
 import AnnouncementBar from '../components/layout/AnnouncementBar';
@@ -22,6 +23,7 @@ export default function ProductDetail() {
   const { products, loading: productsLoading } = useProducts();
   const { collections } = useCollections({ includeSeedFallbacks: true });
   const { addItem } = useCartStore();
+  const { addOrder } = useOrders();
 
   const [activeImage, setActiveImage] = useState<string>('');
   const [showVideo, setShowVideo] = useState(false);
@@ -29,6 +31,16 @@ export default function ProductDetail() {
   const [isAddedFeedback, setIsAddedFeedback] = useState<boolean>(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [paymentSuccessId, setPaymentSuccessId] = useState<string | null>(null);
+
+  // Buyer details required before "Buy Now / Pay Online" can proceed —
+  // without these, a successful payment had nowhere to be saved and never
+  // appeared in the admin orders panel.
+  const [showBuyerForm, setShowBuyerForm] = useState(false);
+  const [buyerName, setBuyerName] = useState('');
+  const [buyerPhone, setBuyerPhone] = useState('');
+  const [buyerAddress, setBuyerAddress] = useState('');
+  const [buyerPincode, setBuyerPincode] = useState('');
 
   const product = products.find((p) => p.slug === slug && !p.isDeleted);
 
@@ -99,7 +111,26 @@ export default function ProductDetail() {
     setTimeout(() => setIsAddedFeedback(false), 2000);
   };
 
-  const handleOnlinePayment = async () => {
+  // "Pay Online" first collects delivery details (so we have somewhere to
+  // ship the item and something to show in /admin), then hands off to
+  // Razorpay.
+  const handleOnlinePayment = () => {
+    setPaymentError(null);
+    setShowBuyerForm(true);
+  };
+
+  const handleBuyerFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!buyerName || !buyerPhone || !buyerAddress || !buyerPincode) {
+      setPaymentError('Please fill in all delivery details to continue.');
+      return;
+    }
+    if (buyerPhone.replace(/[^0-9]/g, '').length < 10) {
+      setPaymentError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
     const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID?.trim();
     if (!keyId) {
       setPaymentError('Online payment is not configured. Add VITE_RAZORPAY_KEY_ID to your local .env file.');
@@ -138,17 +169,54 @@ export default function ProductDetail() {
         name: 'KALARANG Silks & Studio',
         description: product.name,
         image: '/kalarang.png',
+        prefill: { name: buyerName, contact: buyerPhone },
         notes: { product_slug: product.slug, selected_colour: selectedColor || 'Standard' },
         theme: { color: '#7A1C2E' },
-        handler: () => {
-          setPaymentError('Payment received. Please save your payment confirmation for order support.');
+        handler: async (response: { razorpay_payment_id?: string }) => {
+          // Payment succeeded on Razorpay's side — now save the order to
+          // Supabase so it shows up in /admin/orders and on the customer's
+          // /track-order page. Without this call, a successful payment had
+          // no record anywhere.
+          try {
+            const orderId = await addOrder({
+              customerName: buyerName,
+              phone: buyerPhone.replace(/[^0-9]/g, ''),
+              address: buyerAddress,
+              pincode: buyerPincode,
+              notes: '',
+              items: [
+                {
+                  productId: product.id,
+                  productName: product.name,
+                  color: selectedColor || 'Standard',
+                  image: imagesList[0] || '',
+                  qty: 1,
+                  price: product.salePrice,
+                },
+              ],
+              subtotal: product.salePrice,
+              shippingCharges: 0,
+              total: product.salePrice,
+              paymentMethod: 'online',
+              paymentId: response.razorpay_payment_id,
+            });
+            setShowBuyerForm(false);
+            setPaymentSuccessId(orderId);
+          } catch (saveError) {
+            console.error('Failed to save paid order:', saveError);
+            setPaymentError(
+              'Payment succeeded but we could not save your order automatically. ' +
+              'Please contact us with your payment confirmation so we can log it manually.'
+            );
+          } finally {
+            setPaymentLoading(false);
+          }
         },
         modal: { ondismiss: () => setPaymentLoading(false) },
       });
       checkout.open();
     } catch (error) {
       setPaymentError(error instanceof Error ? error.message : 'Unable to open online payment.');
-    } finally {
       setPaymentLoading(false);
     }
   };
@@ -416,6 +484,102 @@ export default function ProductDetail() {
         )}
 
       </div>
+
+      {/* Buyer details modal — collected before Razorpay opens */}
+      {showBuyerForm && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+          <div className="bg-[#FDF8F2] border-2 border-[#B8860B] rounded-lg max-w-md w-full p-6 shadow-xl">
+            <h2 className="font-serif text-xl font-bold text-[#1C1008] uppercase mb-1">Delivery Details</h2>
+            <p className="text-xs text-gray-500 mb-4 font-sans">
+              We need this to ship your saree and confirm your payment.
+            </p>
+            <form onSubmit={handleBuyerFormSubmit} className="flex flex-col gap-3 font-sans">
+              <input
+                type="text"
+                required
+                placeholder="Full Name"
+                value={buyerName}
+                onChange={(e) => setBuyerName(e.target.value)}
+                className="bg-white border border-[#B8860B]/25 rounded px-3.5 py-2.5 text-sm text-[#1C1008] focus:border-[#7A1C2E] focus:outline-none"
+              />
+              <input
+                type="tel"
+                required
+                placeholder="10-digit mobile number"
+                value={buyerPhone}
+                onChange={(e) => setBuyerPhone(e.target.value)}
+                className="bg-white border border-[#B8860B]/25 rounded px-3.5 py-2.5 text-sm text-[#1C1008] focus:border-[#7A1C2E] focus:outline-none"
+              />
+              <textarea
+                required
+                rows={2}
+                placeholder="Shipping address"
+                value={buyerAddress}
+                onChange={(e) => setBuyerAddress(e.target.value)}
+                className="bg-white border border-[#B8860B]/25 rounded px-3.5 py-2.5 text-sm text-[#1C1008] focus:border-[#7A1C2E] focus:outline-none resize-none"
+              />
+              <input
+                type="text"
+                required
+                placeholder="Pincode"
+                value={buyerPincode}
+                onChange={(e) => setBuyerPincode(e.target.value)}
+                className="bg-white border border-[#B8860B]/25 rounded px-3.5 py-2.5 text-sm text-[#1C1008] focus:border-[#7A1C2E] focus:outline-none"
+              />
+
+              {paymentError && (
+                <p className="text-xs text-[#7A1C2E] bg-[#E8D5B0]/25 border border-[#B8860B]/20 rounded p-2.5">
+                  {paymentError}
+                </p>
+              )}
+
+              <div className="flex gap-2.5 mt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowBuyerForm(false)}
+                  className="flex-1 py-3 rounded text-xs font-bold uppercase tracking-wider border border-[#B8860B]/30 text-[#1C1008]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={paymentLoading}
+                  className="flex-1 py-3 rounded text-xs font-bold uppercase tracking-wider bg-[#7A1C2E] hover:bg-[#1C1008] disabled:opacity-60 text-white"
+                >
+                  {paymentLoading ? 'Opening Payment...' : 'Continue to Payment'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Post-payment success modal */}
+      {paymentSuccessId && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+          <div className="bg-[#FDF8F2] border-2 border-[#B8860B] rounded-lg max-w-md w-full p-6 shadow-xl text-center flex flex-col items-center gap-3">
+            <Check className="h-12 w-12 text-green-700" />
+            <h2 className="font-serif text-xl font-bold text-[#1C1008] uppercase">Payment Successful!</h2>
+            <p className="text-sm text-gray-600 font-sans">Your order has been placed and recorded.</p>
+            <code className="text-xs font-mono font-bold text-[#7A1C2E] uppercase select-all bg-white px-3 py-1.5 rounded border border-[#B8860B]/20">
+              {paymentSuccessId}
+            </code>
+            <p className="text-xs text-gray-500 font-sans">
+              You can check your order status anytime at{' '}
+              <Link to="/track-order" className="text-[#7A1C2E] font-bold underline">
+                Track Order
+              </Link>{' '}
+              using your mobile number.
+            </p>
+            <button
+              onClick={() => setPaymentSuccessId(null)}
+              className="mt-2 w-full py-3 rounded text-xs font-bold uppercase tracking-wider bg-[#7A1C2E] hover:bg-[#1C1008] text-white"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

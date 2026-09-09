@@ -57,6 +57,8 @@ export interface Order {
   shippingCharges: number;
   total: number;
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered';
+  paymentMethod?: 'cod' | 'online';
+  paymentId?: string;
   createdAt: any;         // { seconds: number } (Firestore-style shape kept for compatibility)
 }
 

@@ -10,6 +10,7 @@ import About from './pages/About';
 import Services from './pages/Services';
 import Founder from './pages/Founder';
 import Contact from './pages/Contact';
+import TrackOrder from './pages/TrackOrder';
 
 // Administrative Modules
 import AdminLogin from './pages/admin/AdminLogin';
@@ -36,6 +37,7 @@ export default function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/founder" element={<Founder />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/track-order" element={<TrackOrder />} />
 
         {/* SECURE ADMIN CONTROL ROUTES */}
         <Route path="/admin/login" element={<AdminLogin />} />

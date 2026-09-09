@@ -10,6 +10,7 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [liveStatus, setLiveStatus] = useState<'connecting' | 'live' | 'offline'>('connecting');
 
   // Subscribe to raw collection updates in real-time
   useEffect(() => {
@@ -23,6 +24,9 @@ export default function AdminOrders() {
         console.error('Enquiry real-time load error:', err);
         setLoading(false);
         setLoadError(err.message);
+      },
+      (status) => {
+        setLiveStatus(status === 'SUBSCRIBED' ? 'live' : 'offline');
       }
     );
     return () => unsubscribe();
@@ -48,13 +52,28 @@ export default function AdminOrders() {
     <div id="admin-purchase-orders" className="flex flex-col gap-6 font-sans text-xs sm:text-sm">
       
       {/* Header operations area */}
-      <div className="border-b border-[#B8860B]/15 pb-4">
-        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1C1008] uppercase">
-          Administrative Orders Tracker
-        </h1>
-        <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
-          Real-time, zero-latency streaming of customer purchase inquiry queues. Coordinate payment directly.
-        </p>
+      <div className="border-b border-[#B8860B]/15 pb-4 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1C1008] uppercase">
+            Administrative Orders Tracker
+          </h1>
+          <p className="text-gray-500 text-xs sm:text-sm mt-0.5">
+            Real-time, zero-latency streaming of customer purchase inquiry queues. Coordinate payment directly.
+          </p>
+        </div>
+        <span
+          className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shrink-0 ${
+            liveStatus === 'live'
+              ? 'bg-green-100 text-green-800'
+              : liveStatus === 'offline'
+              ? 'bg-red-100 text-red-700'
+              : 'bg-gray-100 text-gray-500'
+          }`}
+          title={liveStatus === 'offline' ? 'Realtime not connected — falling back to 15s refresh. Check Supabase Dashboard > Database > Replication.' : undefined}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${liveStatus === 'live' ? 'bg-green-600 animate-pulse' : liveStatus === 'offline' ? 'bg-red-600' : 'bg-gray-400'}`} />
+          {liveStatus === 'live' ? 'Live' : liveStatus === 'offline' ? 'Offline (auto-refresh)' : 'Connecting…'}
+        </span>
       </div>
 
       {loading ? (
@@ -101,6 +120,15 @@ export default function AdminOrders() {
                     </strong>
                     <span className="text-[11px] text-gray-500 font-sans mt-0.5">
                       Placed At: {dateStr}
+                    </span>
+                    <span
+                      className={`inline-flex w-fit items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mt-1 ${
+                        order.paymentMethod === 'online'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {order.paymentMethod === 'online' ? `Paid Online${order.paymentId ? ` · ${order.paymentId}` : ''}` : 'Cash on Delivery'}
                     </span>
                   </div>
 

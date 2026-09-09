@@ -78,9 +78,9 @@ export default function Navbar({ searchQuery, onSearchChange }: NavbarProps) {
 
           <div className="flex items-center justify-end gap-1 sm:gap-2 min-w-[2.5rem] sm:min-w-[5rem] z-10 text-cream">
             <Link
-              to="/admin/login"
+              to="/track-order"
               className="h-10 w-10 flex items-center justify-center hover:text-gold transition-colors"
-              title="Account"
+              title="Track Your Order"
             >
               <User className="h-5 w-5" />
             </Link>

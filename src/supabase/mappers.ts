@@ -252,6 +252,8 @@ export interface OrderRow {
   shipping_charges: number;
   total: number;
   status: Order['status'];
+  payment_method: 'cod' | 'online' | null;
+  payment_id: string | null;
   created_at: string;
 }
 
@@ -270,11 +272,15 @@ export function rowToOrder(row: OrderRow): Order {
     shippingCharges: Number(row.shipping_charges),
     total: Number(row.total),
     status: row.status,
+    paymentMethod: row.payment_method ?? 'cod',
+    paymentId: row.payment_id ?? undefined,
     createdAt: toTimestamp(row.created_at),
   };
 }
 
-export function orderToRow(data: Omit<Order, 'id' | 'createdAt' | 'status'>): Record<string, unknown> {
+export function orderToRow(
+  data: Omit<Order, 'id' | 'createdAt' | 'status'>
+): Record<string, unknown> {
   return {
     customer_name: data.customerName,
     phone: data.phone,
@@ -287,6 +293,11 @@ export function orderToRow(data: Omit<Order, 'id' | 'createdAt' | 'status'>): Re
     discount_percent: data.discountPercent,
     shipping_charges: data.shippingCharges,
     total: data.total,
-    status: 'pending',
+    // Online (Razorpay) payments are marked 'confirmed' immediately since
+    // money has already been received; COD orders stay 'pending' until
+    // admin confirms them.
+    status: data.paymentMethod === 'online' ? 'confirmed' : 'pending',
+    payment_method: data.paymentMethod ?? 'cod',
+    payment_id: data.paymentId ?? null,
   };
 }
