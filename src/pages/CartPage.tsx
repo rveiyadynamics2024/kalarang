@@ -6,6 +6,7 @@ import { useCartStore } from '../store/cartStore';
 import { useSettings } from '../hooks/useSettings';
 import { useOrders } from '../hooks/useOrders';
 import { createPaymentOrder, openRazorpayCheckout, verifyPayment } from '../supabase/payments';
+import CouponInput, { AppliedCoupon } from '../components/checkout/CouponInput';
 import AnnouncementBar from '../components/layout/AnnouncementBar';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
@@ -26,6 +27,7 @@ export default function CartPage() {
   const [submitting, setSubmitting] = useState(false);
   const [successOrderId, setSuccessOrderId] = useState<string | null>(null);
   const [isFirstOrder, setIsFirstOrder] = useState<boolean | null>(null);
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
   useEffect(() => {
     const normalized = phone.replace(/[^0-9]/g, '');
@@ -68,7 +70,10 @@ export default function CartPage() {
   const discountAmount =
     isFirstOrder && discountEnabled ? Math.round(subtotal * discountPercent / 100) : 0;
   const shippingCharges = subtotal >= freeThreshold ? 0 : 200;
-  const grandTotal = subtotal - discountAmount + shippingCharges;
+  // Coupon is applied after the first-order discount
+  const amountForCoupon = subtotal - discountAmount;
+  const couponDiscount = appliedCoupon ? Math.min(appliedCoupon.discount, amountForCoupon) : 0;
+  const grandTotal = subtotal - discountAmount - couponDiscount + shippingCharges;
 
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,6 +107,7 @@ export default function CartPage() {
           color: item.color,
           qty: item.qty,
         })),
+        couponCode: appliedCoupon?.code,
       });
 
       await openRazorpayCheckout(
@@ -113,6 +119,7 @@ export default function CartPage() {
             await verifyPayment(paymentOrder.orderId, response);
             setSuccessOrderId(paymentOrder.orderId);
             clearCart();
+            setAppliedCoupon(null);
           } catch (verificationError) {
             console.error('Payment verification failure:', verificationError);
             alert(
@@ -392,6 +399,9 @@ export default function CartPage() {
                     />
                   </div>
 
+                  {/* Coupon code */}
+                  <CouponInput amount={amountForCoupon} applied={appliedCoupon} onChange={setAppliedCoupon} />
+
                   <hr className="border-[#B8860B]/10 my-1" />
 
                   {/* Calculations receipts summary layout */}
@@ -404,6 +414,12 @@ export default function CartPage() {
                       <div className="flex justify-between text-green-700">
                         <span>First Order Discount ({discountPercent}%):</span>
                         <span>-₹{discountAmount.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
+                    {couponDiscount > 0 && appliedCoupon && (
+                      <div className="flex justify-between text-green-700">
+                        <span>Coupon ({appliedCoupon.code}):</span>
+                        <span>-₹{couponDiscount.toLocaleString('en-IN')}</span>
                       </div>
                     )}
                     {isFirstOrder === false && discountEnabled && (

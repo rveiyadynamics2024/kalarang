@@ -54,6 +54,8 @@ export interface Order {
   subtotal: number;
   discountAmount?: number;
   discountPercent?: number;
+  couponCode?: string;
+  couponDiscount?: number;
   shippingCharges: number;
   total: number;
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered';
@@ -103,4 +105,18 @@ export interface ColorFamily {
   name: string;
   swatch: string;
   shades: string[];
+}
+
+export interface Coupon {
+  id: string;
+  code: string;
+  discountType: 'percent' | 'fixed';
+  discountValue: number;
+  minOrderAmount: number;
+  maxDiscount: number | null;
+  usageLimit: number | null;
+  usedCount: number;
+  expiresAt: string | null;
+  isActive: boolean;
+  createdAt: string;
 }

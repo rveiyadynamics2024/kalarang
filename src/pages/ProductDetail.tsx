@@ -6,6 +6,7 @@ import { useProducts } from '../hooks/useProducts';
 import { useCollections } from '../hooks/useCollections';
 import { useCartStore } from '../store/cartStore';
 import { createPaymentOrder, openRazorpayCheckout, verifyPayment } from '../supabase/payments';
+import CouponInput, { AppliedCoupon } from '../components/checkout/CouponInput';
 import ProductGrid from '../components/products/ProductGrid';
 import AnnouncementBar from '../components/layout/AnnouncementBar';
 import Navbar from '../components/layout/Navbar';
@@ -34,6 +35,7 @@ export default function ProductDetail() {
   const [buyerPhone, setBuyerPhone] = useState('');
   const [buyerAddress, setBuyerAddress] = useState('');
   const [buyerPincode, setBuyerPincode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
 
   const product = products.find((p) => p.slug === slug && !p.isDeleted);
 
@@ -142,6 +144,7 @@ export default function ProductDetail() {
           color: selectedColor || 'Standard',
           qty: 1,
         }],
+        couponCode: appliedCoupon?.code,
       });
 
       await openRazorpayCheckout(
@@ -152,6 +155,7 @@ export default function ProductDetail() {
           try {
             await verifyPayment(paymentOrder.orderId, response);
             setShowBuyerForm(false);
+            setAppliedCoupon(null);
             setPaymentSuccessId(paymentOrder.orderId);
           } catch (verificationError) {
             console.error('Payment verification failure:', verificationError);
@@ -476,6 +480,18 @@ export default function ProductDetail() {
                 onChange={(e) => setBuyerPincode(e.target.value)}
                 className="bg-white border border-[#B8860B]/25 rounded px-3.5 py-2.5 text-sm text-[#1C1008] focus:border-[#7A1C2E] focus:outline-none"
               />
+
+              {/* Coupon code */}
+              <CouponInput amount={product.salePrice} applied={appliedCoupon} onChange={setAppliedCoupon} />
+
+              <div className="flex justify-between items-center text-sm bg-[#E8D5B0]/25 border border-[#B8860B]/15 rounded px-3.5 py-2.5">
+                <span className="text-gray-600">
+                  {appliedCoupon ? `Price after coupon (${appliedCoupon.code})` : 'You pay'}
+                </span>
+                <span className="font-bold text-[#7A1C2E]">
+                  ₹{Math.max(product.salePrice - (appliedCoupon?.discount ?? 0), 0).toLocaleString('en-IN')}
+                </span>
+              </div>
 
               {paymentError && (
                 <p className="text-xs text-[#7A1C2E] bg-[#E8D5B0]/25 border border-[#B8860B]/20 rounded p-2.5">

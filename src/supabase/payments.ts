@@ -14,6 +14,24 @@ export interface PaymentOrderRequest {
     color: string;
     qty: number;
   }>;
+  couponCode?: string;
+}
+
+export interface CouponResult {
+  valid: boolean;
+  code?: string;
+  discount?: number;
+  message: string;
+}
+
+/** Asks the database if a coupon is valid for this amount and how much it takes off. */
+export async function validateCoupon(code: string, amount: number): Promise<CouponResult> {
+  const { data, error } = await supabase.rpc('validate_coupon', {
+    p_code: code,
+    p_amount: amount,
+  });
+  if (error) throw new Error('Could not check the coupon. Please try again.');
+  return data as CouponResult;
 }
 
 export interface PaymentOrder {

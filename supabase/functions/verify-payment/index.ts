@@ -91,12 +91,20 @@ Deno.serve(async (request) => {
       return jsonResponse({ error: 'Razorpay has not captured this payment.' }, 409);
     }
 
-    const { error: updateError } = await admin
+    const { data: updatedOrders, error: updateError } = await admin
       .from('orders')
       .update({ payment_status: 'paid', payment_id: input.razorpayPaymentId, status: 'confirmed' })
       .eq('id', input.orderId)
-      .eq('payment_status', 'pending');
+      .eq('payment_status', 'pending')
+      .select('coupon_code');
     if (updateError) throw new Error('Payment was captured, but the order could not be updated. Please contact support.');
+
+    // Payment succeeded -> count this coupon as "used" once.
+    const usedCoupon = updatedOrders?.[0]?.coupon_code;
+    if (usedCoupon) {
+      const { error: couponError } = await admin.rpc('increment_coupon_usage', { p_code: usedCoupon });
+      if (couponError) console.error('Coupon usage count failed:', couponError.message);
+    }
 
     return jsonResponse({ verified: true });
   } catch (error) {

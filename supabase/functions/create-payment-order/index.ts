@@ -22,6 +22,7 @@ interface CreateOrderRequest {
     notes?: string;
   };
   items: RequestItem[];
+  couponCode?: string;
 }
 
 Deno.serve(async (request) => {
@@ -129,7 +130,28 @@ Deno.serve(async (request) => {
       if (subtotalPaise < thresholdPaise) shippingPaise = 20000;
     }
 
-    const totalPaise = subtotalPaise - discountPaise + shippingPaise;
+    // Coupon code: the server checks it again here (never trust the browser).
+    let couponPaise = 0;
+    let couponCode: string | null = null;
+    const rawCoupon = typeof input.couponCode === 'string' ? input.couponCode.trim().slice(0, 40) : '';
+    if (rawCoupon) {
+      const amountForCoupon = (subtotalPaise - discountPaise) / 100;
+      const { data: couponResult, error: couponError } = await admin.rpc('validate_coupon', {
+        p_code: rawCoupon,
+        p_amount: amountForCoupon,
+      });
+      if (couponError) throw new Error('Unable to validate the coupon code.');
+      if (!couponResult?.valid) {
+        return jsonResponse({ error: couponResult?.message ?? 'Invalid coupon code.' }, 400);
+      }
+      couponPaise = Math.round(Number(couponResult.discount) * 100);
+      couponCode = String(couponResult.code);
+      if (!Number.isSafeInteger(couponPaise) || couponPaise < 0) {
+        return jsonResponse({ error: 'The coupon discount is invalid.' }, 400);
+      }
+    }
+
+    const totalPaise = subtotalPaise - discountPaise - couponPaise + shippingPaise;
     if (!Number.isSafeInteger(totalPaise) || totalPaise < 100) {
       return jsonResponse({ error: 'The order total is below the minimum payment amount.' }, 400);
     }
@@ -166,6 +188,8 @@ Deno.serve(async (request) => {
       subtotal: subtotalPaise / 100,
       discount_amount: discountPaise / 100,
       discount_percent: discountPercent || null,
+      coupon_code: couponCode,
+      coupon_discount: couponPaise / 100,
       shipping_charges: shippingPaise / 100,
       total: totalPaise / 100,
       status: 'pending',

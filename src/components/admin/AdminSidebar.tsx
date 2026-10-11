@@ -8,7 +8,8 @@ import {
   Settings as SettingsIcon, 
   LogOut,
   Sparkles,
-  Clapperboard
+  Clapperboard,
+  Ticket
 } from 'lucide-react';
 import { logoutAdmin } from '../../auth';
 
@@ -33,6 +34,7 @@ export default function AdminSidebar({ onNavigate }: AdminSidebarProps) {
     { name: 'Home Banners', path: '/admin/banners', icon: Image },
     { name: 'Hero Videos', path: '/admin/videos', icon: Clapperboard },
     { name: 'Customer Orders', path: '/admin/orders', icon: ShoppingBag },
+    { name: 'Coupon Codes', path: '/admin/coupons', icon: Ticket },
     { name: 'Store Settings', path: '/admin/settings', icon: SettingsIcon },
   ];
 

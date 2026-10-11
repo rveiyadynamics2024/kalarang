@@ -249,6 +249,8 @@ export interface OrderRow {
   subtotal: number;
   discount_amount: number | null;
   discount_percent: number | null;
+  coupon_code: string | null;
+  coupon_discount: number | null;
   shipping_charges: number;
   total: number;
   status: Order['status'];
@@ -270,6 +272,8 @@ export function rowToOrder(row: OrderRow): Order {
     subtotal: Number(row.subtotal),
     discountAmount: row.discount_amount != null ? Number(row.discount_amount) : undefined,
     discountPercent: row.discount_percent != null ? Number(row.discount_percent) : undefined,
+    couponCode: row.coupon_code ?? undefined,
+    couponDiscount: row.coupon_discount != null ? Number(row.coupon_discount) : undefined,
     shippingCharges: Number(row.shipping_charges),
     total: Number(row.total),
     status: row.status,

@@ -21,6 +21,7 @@ import AdminCollections from './pages/admin/AdminCollections';
 import AdminBanners from './pages/admin/AdminBanners';
 import AdminVideos from './pages/admin/AdminVideos';
 import AdminOrders from './pages/admin/AdminOrders';
+import AdminCoupons from './pages/admin/AdminCoupons';
 import AdminSettings from './pages/admin/AdminSettings';
 
 export default function App() {
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="banners" element={<AdminBanners />} />
           <Route path="videos" element={<AdminVideos />} />
           <Route path="orders" element={<AdminOrders />} />
+          <Route path="coupons" element={<AdminCoupons />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
