@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import FloatingCartButton from './components/layout/FloatingCartButton';
 
 // Public Pages
 import Home from './pages/Home';
@@ -60,6 +61,9 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
+
+      {/* Floating "View Cart" button - appears after a product is added */}
+      <FloatingCartButton />
     </BrowserRouter>
   );
 }

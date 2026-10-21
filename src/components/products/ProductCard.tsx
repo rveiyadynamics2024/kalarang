@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Star } from 'lucide-react';
+import { ShoppingCart, Heart, Star, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Product } from '../../types';
 import { useCartStore } from '../../store/cartStore';
@@ -17,6 +17,13 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
   const { settings } = useSettings();
   const showAddToCart = product.inStock && product.allowAddToCart !== false;
 
+  // Shows "Added to Cart" on the button for 2 seconds after clicking
+  const [justAdded, setJustAdded] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
+
   const discountPercent = Math.round(
     ((product.mrp - product.salePrice) / product.mrp) * 100
   );
@@ -26,6 +33,9 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
     e.stopPropagation();
     const defaultColor = (product.colors && product.colors[0]) || 'Standard';
     addItem(product, defaultColor);
+    setJustAdded(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setJustAdded(false), 2000);
   };
 
   const mainImage =
@@ -151,10 +161,23 @@ export default function ProductCard({ product, variant = 'default' }: ProductCar
           <button
             type="button"
             onClick={handleAddToCart}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-cream border border-border text-sm font-semibold text-espresso hover:bg-maroon hover:text-white hover:border-maroon transition-colors cursor-pointer"
+            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-semibold transition-colors cursor-pointer ${
+              justAdded
+                ? 'bg-green-700 text-white border-green-700'
+                : 'bg-cream border-border text-espresso hover:bg-maroon hover:text-white hover:border-maroon'
+            }`}
           >
-            <ShoppingCart className="h-4 w-4" />
-            Add to Cart
+            {justAdded ? (
+              <>
+                <Check className="h-4 w-4" />
+                Added to Cart
+              </>
+            ) : (
+              <>
+                <ShoppingCart className="h-4 w-4" />
+                Add to Cart
+              </>
+            )}
           </button>
         </div>
       )}
