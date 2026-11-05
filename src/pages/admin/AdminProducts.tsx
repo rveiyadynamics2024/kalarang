@@ -22,6 +22,7 @@ import {
   Star,
   Replace,
   FileSpreadsheet,
+  Download,
 } from 'lucide-react';
 import {
   DEFAULT_PRODUCT_IMAGE,
@@ -29,6 +30,7 @@ import {
 } from '../../utils/productImageByTitle';
 import { slugFromName } from '../../utils/slug';
 import BulkUploadModal from './BulkUploadModal';
+import { downloadMetaCatalogCsv, downloadMetaCatalogXlsx } from '../../utils/metaCatalogExport';
 
 const OCCASION_OPTIONS = [
   'Wedding',
@@ -476,6 +478,22 @@ export default function AdminProducts() {
           >
             <FileSpreadsheet className="h-4 w-4 shrink-0" />
             Bulk Upload
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadMetaCatalogXlsx(products, collections)}
+            className="inline-flex items-center gap-2 border border-[#B8860B] text-[#7A1C2E] hover:bg-[#B8860B]/10 py-2.5 px-4 rounded text-xs font-extrabold uppercase transition-all cursor-pointer"
+          >
+            <Download className="h-4 w-4 shrink-0" />
+            Meta Catalog (Excel)
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadMetaCatalogCsv(products, collections)}
+            className="inline-flex items-center gap-2 border border-[#B8860B] text-[#7A1C2E] hover:bg-[#B8860B]/10 py-2.5 px-4 rounded text-xs font-extrabold uppercase transition-all cursor-pointer"
+          >
+            <Download className="h-4 w-4 shrink-0" />
+            Meta Catalog (CSV)
           </button>
           <button
             onClick={openAddForm}
