@@ -153,8 +153,15 @@ export default function ProductDetail() {
         async (response) => {
           setPaymentLoading(true);
           try {
-            await verifyPayment(paymentOrder.orderId, response);
-            setShowBuyerForm(false);
+await verifyPayment(paymentOrder.orderId, response);
+
+// Meta Pixel: track sale
+(window as any).fbq?.('track', 'Purchase', {
+  value: paymentOrder.amount / 100,
+  currency: 'INR',
+});
+
+setShowBuyerForm(false);
             setAppliedCoupon(null);
             setPaymentSuccessId(paymentOrder.orderId);
           } catch (verificationError) {

@@ -116,8 +116,15 @@ export default function CartPage() {
         async (response) => {
           setSubmitting(true);
           try {
-            await verifyPayment(paymentOrder.orderId, response);
-            setSuccessOrderId(paymentOrder.orderId);
+await verifyPayment(paymentOrder.orderId, response);
+
+// Meta Pixel: track sale
+(window as any).fbq?.('track', 'Purchase', {
+  value: paymentOrder.amount / 100,
+  currency: 'INR',
+});
+
+setSuccessOrderId(paymentOrder.orderId);
             clearCart();
             setAppliedCoupon(null);
           } catch (verificationError) {
